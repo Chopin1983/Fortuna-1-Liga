@@ -1,0 +1,284 @@
+use Portfolio2
+
+CREATE TABLE Szczegóły_Meczu
+(
+Mecz char(16) not null,
+Minuta tinyint not null,
+Bramka tinyint null,
+Asysta tinyint null,
+Żółta_kartka tinyint null,
+Czerwona_kartka tinyint null,
+Pierwszy_skład char(1) not null,
+Czas_na_boisku tinyint not null,
+ID_Piłkarza smallint not null,
+Zmiany varchar(100) null,
+Constraint FK_Mecz Foreign key (Mecz)
+References Mecze(Mecz),
+Constraint FK_Piłkarze Foreign key (ID_Piłkarza)
+References Piłkarze(ID_Piłkarza),
+Constraint CH_Szczegóły_Meczu Check(Pierwszy_skład like '[TN]'));
+
+CREATE TABLE Mecze
+(
+Mecz char(16) not null,
+Gospodarz char(6) not null,
+Bramki_Gospodarz tinyint not null,
+Bramki_Gość tinyint not null,
+Gość char(6) not null,
+Data_meczu smalldatetime not null,
+Kolejka tinyint not null,
+Constraint PK_Mecze Primary key (Mecz));
+
+
+--Stworzyć tabele dla każdego klubu
+CREATE TABLE Znicz_Pruszków
+(
+ID_Piłkarza smallint not null,
+ID_Klubu char(6) not null,
+Zawodnik varchar(30) not null,
+Nr tinyint not null,
+Pozycja varchar(30) not null,
+Data_Urodzenia date not null,
+Constraint PK_ID_Piłkarza_ZP Primary key (ID_Piłkarza),
+Constraint Ch_Pozycja_ZP Check(Pozycja like 'Bramkarz' or Pozycja like 'Środkowy obrońca' or Pozycja like 'Lewy obrońca'
+or Pozycja like 'Prawy obrońca' or Pozycja like 'Defensywny pomocnik' or Pozycja like 'Ofensywny pomocnik' or Pozycja like 'Lewy napastnik'
+or Pozycja like 'Prawy napastnik' or Pozycja like 'Środkowy napastnik'));
+
+BULK INSERT  Znicz_Pruszków from 'C:\Users\HP\Desktop\Projekt_tabel\Tabele Piłkarskie\Znicz_Pruszków.csv' with
+(
+datafiletype = 'Widechar',
+Format = 'CSV',
+Firstrow = 2,
+Fieldterminator = ',',
+Rowterminator = '\n');
+
+CREATE TABLE Piłkarze
+(
+ID_Piłkarza smallint not null,
+ID_Klubu char(6) not null,
+Zawodnik varchar(30) not null,
+Nr tinyint not null,
+Pozycja varchar(30) not null,
+Data_Urodzenia date not null,
+Constraint PK_ID_Piłkarza Primary key (ID_Piłkarza),
+Constraint Ch_Pozycja Check(Pozycja like 'Bramkarz' or Pozycja like 'Środkowy obrońca' or Pozycja like 'Lewy obrońca'
+or Pozycja like 'Prawy obrońca' or Pozycja like 'Defensywny pomocnik' or Pozycja like 'Ofensywny pomocnik' or Pozycja like 'Lewy napastnik'
+or Pozycja like 'Prawy napastnik' or Pozycja like 'Środkowy napastnik'));
+
+INSERT INTO Piłkarze(ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia)
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Arka_Gdynia
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from BBT_Nieciecza
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Chrobry_Głogów
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from GKS_Katowice
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from GKS_Tychy
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Górnik_Łęczna
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Lechia_Gdańsk
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Miedź_Legnica
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Motor_Lublin
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Odra_Opole
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Podbeskidzie_BielskoBiała
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Polonia_Warszawa
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Resovia_Rzeszów
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Stal_Rzeszów
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Wisła_Kraków
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Wisła_Płock
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Zagłębie_Sosnowiec
+union all
+Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Znicz_Pruszków;
+
+--Update błędu na stronie 
+UPDATE Znicz_Pruszków
+set Pozycja = Case When Pozycja = 'Prawy pomocnik' then 'Prawy napastnik'
+				   When Pozycja = 'Lewy pomocnik' then 'Lewy napastnik' 
+				   end
+Where Pozycja in ('Prawy pomocnik', 'Lewy pomocnik');
+
+
+CREATE PROCEDURE Wstawianie_Meczy
+@Mecz char(16),
+@Gospodarz char(6),
+@Bramki_Gospodarz tinyint,
+@Bramki_Gość tinyint,
+@Gość char(6),
+@Data_meczu smalldatetime,
+@Kolejka tinyint as
+
+INSERT INTO Mecze(Mecz,Gospodarz,Bramki_Gospodarz,Bramki_Gość,Gość,Data_meczu,Kolejka)
+Values (@Mecz,@Gospodarz,@Bramki_Gospodarz,@Bramki_Gość,@Gość,@Data_meczu,@Kolejka);
+
+Exec Wstawianie_Meczy
+@Mecz = 'WisPło vs WisKra',
+@Gospodarz = 'WisPło',
+@Bramki_Gospodarz = 1,
+@Bramki_Gość = 1,
+@Gość = 'WisKra',
+@Data_meczu = '20240413 17:30',
+@Kolejka = 27 ;
+
+CREATE PROCEDURE Wstawianie_Szczegółów
+@Mecz Char(16),
+@Minuta tinyint,
+@Bramka tinyint,
+@Asysta tinyint,
+@Żółta_kartka tinyint,
+@Czerwona_kartka tinyint,
+@Pierwszy_skład char(1),
+@Czas_na_boisku tinyint,
+@ID_Piłkarza smallint,
+@Zmiany Varchar(100) as
+
+INSERT INTO Szczegóły_Meczu(Mecz,Minuta,Bramka,Asysta,Żółta_kartka,Czerwona_kartka,Pierwszy_skład,Czas_na_boisku,ID_Piłkarza,Zmiany)
+Values(@Mecz,@Minuta,@Bramka,@Asysta,@Żółta_kartka,@Czerwona_kartka,@Pierwszy_skład,@Czas_na_boisku,@ID_Piłkarza,@Zmiany)
+
+Exec Wstawianie_Szczegółów
+@Mecz = 'WisPło vs WisKra',
+@Minuta = 70,
+@Bramka = null,
+@Asysta = null,
+@Żółta_kartka = null,
+@Czerwona_kartka = null,
+@Pierwszy_skład = N,
+@Czas_na_boisku = 20,
+@ID_Piłkarza = 423,
+@Zmiany = 'D.Junca -> J.Krzyżanowski';
+
+CREATE TABLE Wyniki_Excel
+(
+Kolejka tinyint not null,
+Data char(8) not null,
+Godzina char(8) not null,
+Wynik Varchar(max) not null)
+
+BULK INSERT Wyniki_Excel from 'C:\Users\HP\Desktop\Projekt_tabel\Wyniki_Excel.csv' with
+(
+Datafiletype = 'Widechar',
+Format = 'CSV',
+Firstrow = 2,
+Fieldterminator = ',',
+Rowterminator = '\n');
+
+With A as
+
+(Select Kolejka, Cast(Case When Right(Data,2) between '07' and '12' Then '2023' Else '2024' end + '-' + Right(Replace(Right(Data,5),'/','-'),2) + '-'
++Left(Replace(Right(Data,5),'/','-'),2) + ' ' + Godzina as Smalldatetime) as Data_Meczu, 
+Case When Wynik like 'Arka Gdynia%' then 'ArkGdy' 
+	 When Wynik like 'Motor Lublin%' then 'MotLub'
+	 When Wynik like 'Chrobry Głogów%' then 'ChrGło'
+	 When Wynik like 'Górnik Łęczna%' then 'GórŁęc'
+	 When Wynik like 'Polonia Warszawa%' then 'PolWar'
+	 When Wynik like 'Podbeskidzie Bielsko-Biała%' then 'PodBBi'
+	 When Wynik like 'Znicz Pruszków%' then 'ZniPru'
+	 When Wynik like 'Miedź Legnica%' then 'MieLeg'
+	 When Wynik like 'Stal Rzeszów%' then 'StaRze'
+	 When Wynik like 'Termalica Nieciecza%' then 'BBTNie'
+	 When Wynik like 'Zagłębie Sosnowiec%' then 'ZagSos'
+	 When Wynik like 'Lechia Gdańsk%' then 'LecGda'
+	 When Wynik like 'Wisła Kraków%' then 'WisKra'
+	 When Wynik like 'GKS Tychy%' then 'GksTyc'
+	 When Wynik like 'Wisła Płock%' then 'WisPło'
+	 When Wynik like 'Resovia%' then 'ResRze'
+	 When Wynik like 'GKS Katowice%' then 'GKSKat'
+	 When Wynik like 'Odra Opole%' then 'OdrOpo'
+end as Gospodarz, Substring(Wynik, Patindex('%[0-9]-[0-9]%',Wynik),3) as Wynik,
+Case When Right(Wynik,len(Wynik) -3) like '%Arka Gdynia%' then 'ArkGdy' 
+	 When Right(Wynik,len(Wynik) -3) like '%Motor Lublin%' then 'MotLub'
+	 When Right(Wynik,len(Wynik) -3) like '%Chrobry Głogów%' then 'ChrGło'
+	 When Right(Wynik,len(Wynik) -3) like '%Górnik Łęczna%' then 'GórŁęc'
+	 When Right(Wynik,len(Wynik) -3) like '%Polonia Warszawa%' then 'PolWar'
+	 When Right(Wynik,len(Wynik) -3) like '%Podbeskidzie Bielsko-Biała%' then 'PodBBi'
+	 When Right(Wynik,len(Wynik) -3) like '%Znicz Pruszków%' then 'ZniPru'
+	 When Right(Wynik,len(Wynik) -3) like '%Miedź Legnica%' then 'MieLeg'
+	 When Right(Wynik,len(Wynik) -3) like '%Stal Rzeszów%' then 'StaRze'
+	 When Right(Wynik,len(Wynik) -3) like '%Termalica Nieciecza%' then 'BBTNie'
+	 When Right(Wynik,len(Wynik) -3) like '%Zagłębie Sosnowiec%' then 'ZagSos'
+	 When Right(Wynik,len(Wynik) -3) like '%Lechia Gdańsk%' then 'LecGda'
+	 When Right(Wynik,len(Wynik) -3) like '%Wisła Kraków%' then 'WisKra'
+	 When Right(Wynik,len(Wynik) -3) like '%GKS Tychy%' then 'GksTyc'
+	 When Right(Wynik,len(Wynik) -3) like '%Wisła Płock%' then 'WisPło'
+	 When Right(Wynik,len(Wynik) -3) like '%Resovia%' then 'ResRze'
+	 When Right(Wynik,len(Wynik) -3) like '%GKS Katowice%' then 'GKSKat'
+	 When Right(Wynik,len(Wynik) -3) like '%Odra Opole%' then 'OdrOpo'
+end as Gość 
+from Wyniki_Excel)
+
+Insert into Mecze(Mecz,Gospodarz,Bramki_Gospodarz,Bramki_Gość,Gość,Data_Meczu,Kolejka)
+
+Select Gospodarz + ' vs ' + Gość as Mecz, Gospodarz, Left(Wynik,1) as Bramki_Gospodarz,Right(Wynik,1) as Bramki_Gość, Gość,Data_Meczu, Kolejka
+From A;
+
+CREATE VIEW Tabela_Punktów as
+
+With A as
+
+(Select *,Case When Bramki_Gospodarz > Bramki_Gość then 3
+               When Bramki_Gospodarz = Bramki_Gość then 1
+			   When Bramki_Gospodarz < Bramki_Gość then 0 end as Pkt_Gospodarz,
+		  Case When Bramki_Gospodarz > Bramki_Gość then 0
+               When Bramki_Gospodarz = Bramki_Gość then 1
+			   When Bramki_Gospodarz < Bramki_Gość then 3 end as Pkt_Gość
+			   from Mecze),
+
+B as 
+
+(Select Gospodarz as Zespół, sum(Pkt_Gospodarz) as Punkty, Case When Pkt_Gospodarz = 3 then Count(Pkt_Gospodarz) end as Wygrane,
+                                                           Case When Pkt_Gospodarz = 1 then Count(Pkt_Gospodarz) end as Remisy,
+														   Case When Pkt_Gospodarz = 0 then Count(Pkt_Gospodarz) end as Porażki
+from A
+Group by Gospodarz, Pkt_Gospodarz
+
+Union all
+
+Select Gość as Zespół, sum(Pkt_Gość) as Punkty, Case When Pkt_Gość = 3 then Count(Pkt_Gość) end as Wygrane,
+                                                Case When Pkt_Gość = 1 then Count(Pkt_Gość) end as Remisy,
+												Case When Pkt_Gość = 0 then Count(Pkt_Gość) end as Porażki
+from A
+Group by Gość, Pkt_Gość),
+
+C as
+
+(Select Zespół, sum(Punkty) as Pkt, Wygrane, Remisy, Porażki
+from B
+Group by Zespół,Wygrane,Remisy,Porażki)
+
+Select Zespół, sum(Pkt) as Pkt, Sum(Wygrane) as Wygrane, sum(remisy) as Remisy, sum(Porażki) as Porażki
+from C
+Group by Zespół;
+
+
+CREATE VIEW Tabele_Kolejki_Bramki as
+
+With A as
+
+(select Gospodarz, Count(Gospodarz) as Mecze, sum(Bramki_Gospodarz) as Bramki_Strzelone, sum(Bramki_Gość) as Bramki_Stracone, Count from Mecze
+group by Gospodarz
+
+union all
+
+select Gość as Gospodarz, count(Gość) as Mecze, sum(Bramki_Gość) as Bramki_Strzelone, sum(Bramki_Gospodarz) as Bramki_Stracone from Mecze
+group by Gość)
+
+Select Gospodarz as Zespół, sum(Mecze) as Mecze, sum(Bramki_Strzelone) as Bramki_Strzelone, sum(Bramki_Stracone) as Bramki_Stracone
+from A
+Group by Gospodarz;
+
+
+select * from Tabele_Kolejki_Bramki
+select * from Tabela_Punktów
+
+--Dokończyć -> Seria 5 ostatnich meczów, Klasyfikacja kanadyjska, Mała tabela, Król strzelców, Drużyna Fairplay
