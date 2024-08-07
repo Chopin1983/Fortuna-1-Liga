@@ -3,14 +3,15 @@ use Portfolio2
 CREATE TABLE Szczegóły_Meczu
 (
 Mecz char(16) not null,
-Minuta tinyint not null,
+Minuta tinyint null,
 Bramka tinyint null,
+Bramka_samobójcza tinyint null,
 Asysta tinyint null,
 Żółta_kartka tinyint null,
 Czerwona_kartka tinyint null,
-Pierwszy_skład char(1) not null,
-Czas_na_boisku tinyint not null,
-ID_Piłkarza smallint not null,
+Pierwszy_skład char(1) null,
+Czas_na_boisku tinyint null,
+ID_Piłkarza smallint null,
 Zmiany varchar(100) null,
 Constraint FK_Mecz Foreign key (Mecz)
 References Mecze(Mecz),
@@ -30,7 +31,7 @@ Kolejka tinyint not null,
 Constraint PK_Mecze Primary key (Mecz));
 
 
---Stworzyć tabele dla każdego klubu
+--Stworzyć tabele dla każdego klubu - Zmienne - Nazwa tabeli, nazwa PK, nazwa Chk 
 CREATE TABLE Znicz_Pruszków
 (
 ID_Piłkarza smallint not null,
@@ -44,6 +45,7 @@ Constraint Ch_Pozycja_ZP Check(Pozycja like 'Bramkarz' or Pozycja like 'Środkow
 or Pozycja like 'Prawy obrońca' or Pozycja like 'Defensywny pomocnik' or Pozycja like 'Ofensywny pomocnik' or Pozycja like 'Lewy napastnik'
 or Pozycja like 'Prawy napastnik' or Pozycja like 'Środkowy napastnik'));
 
+--Insert tabel piłkarzy każdego klubu - Zmienne - Nazwa tabeli, link do pliku
 BULK INSERT  Znicz_Pruszków from 'C:\Users\HP\Desktop\Projekt_tabel\Tabele Piłkarskie\Znicz_Pruszków.csv' with
 (
 datafiletype = 'Widechar',
@@ -65,6 +67,8 @@ Constraint Ch_Pozycja Check(Pozycja like 'Bramkarz' or Pozycja like 'Środkowy o
 or Pozycja like 'Prawy obrońca' or Pozycja like 'Defensywny pomocnik' or Pozycja like 'Ofensywny pomocnik' or Pozycja like 'Lewy napastnik'
 or Pozycja like 'Prawy napastnik' or Pozycja like 'Środkowy napastnik'));
 
+
+-- Insert wszystkich tabel piłkarzy każdego klubu do jednej tabeli
 INSERT INTO Piłkarze(ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia)
 Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Arka_Gdynia
 union all
@@ -102,15 +106,14 @@ Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Zagł�
 union all
 Select ID_Piłkarza, ID_Klubu, Zawodnik, Nr, Pozycja, Data_Urodzenia from Znicz_Pruszków;
 
---Update błędu na stronie 
+--Update błędu na stronie, Dodać do Bulk insert opcję Check_Constraint
 UPDATE Znicz_Pruszków
 set Pozycja = Case When Pozycja = 'Prawy pomocnik' then 'Prawy napastnik'
-				   When Pozycja = 'Lewy pomocnik' then 'Lewy napastnik' 
-				   end
+		   When Pozycja = 'Lewy pomocnik' then 'Lewy napastnik' end
 Where Pozycja in ('Prawy pomocnik', 'Lewy pomocnik');
 
-
-CREATE PROCEDURE Wstawianie_Meczy
+-- Procedura na wstawianie wyników
+CREATE PROCEDURE Wstawianie_Meczów
 @Mecz char(16),
 @Gospodarz char(6),
 @Bramki_Gospodarz tinyint,
@@ -122,19 +125,22 @@ CREATE PROCEDURE Wstawianie_Meczy
 INSERT INTO Mecze(Mecz,Gospodarz,Bramki_Gospodarz,Bramki_Gość,Gość,Data_meczu,Kolejka)
 Values (@Mecz,@Gospodarz,@Bramki_Gospodarz,@Bramki_Gość,@Gość,@Data_meczu,@Kolejka);
 
-Exec Wstawianie_Meczy
-@Mecz = 'WisPło vs WisKra',
-@Gospodarz = 'WisPło',
-@Bramki_Gospodarz = 1,
-@Bramki_Gość = 1,
-@Gość = 'WisKra',
-@Data_meczu = '20240413 17:30',
-@Kolejka = 27 ;
+-- Przykładowa ezgekucja jednego z meczów
+Exec Wstawianie_Meczów
+@Mecz = 'OdrOpo vs ZniPru',
+@Gospodarz = 'OdrOpo',
+@Bramki_Gospodarz = 2,
+@Bramki_Gość = 0,
+@Gość = 'ZniPru',
+@Data_meczu = '20240526 15:00',
+@Kolejka = 34 ;
 
+-- Procedura na wstawianie szczegółów.
 CREATE PROCEDURE Wstawianie_Szczegółów
 @Mecz Char(16),
 @Minuta tinyint,
 @Bramka tinyint,
+@Bramka_samobójcza tinyint,
 @Asysta tinyint,
 @Żółta_kartka tinyint,
 @Czerwona_kartka tinyint,
@@ -143,21 +149,25 @@ CREATE PROCEDURE Wstawianie_Szczegółów
 @ID_Piłkarza smallint,
 @Zmiany Varchar(100) as
 
-INSERT INTO Szczegóły_Meczu(Mecz,Minuta,Bramka,Asysta,Żółta_kartka,Czerwona_kartka,Pierwszy_skład,Czas_na_boisku,ID_Piłkarza,Zmiany)
-Values(@Mecz,@Minuta,@Bramka,@Asysta,@Żółta_kartka,@Czerwona_kartka,@Pierwszy_skład,@Czas_na_boisku,@ID_Piłkarza,@Zmiany)
+INSERT INTO Szczegóły_Meczu(Mecz,Minuta,Bramka,Bramka_samobójcza,Asysta,Żółta_kartka,Czerwona_kartka,Pierwszy_skład,Czas_na_boisku,ID_Piłkarza,Zmiany)
+Values(@Mecz,@Minuta,@Bramka,@Bramka_samobójcza,@Asysta,@Żółta_kartka,@Czerwona_kartka,@Pierwszy_skład,@Czas_na_boisku,@ID_Piłkarza,@Zmiany);
 
+-- Przykładowa egzekucja wstawiania szczegółów
 Exec Wstawianie_Szczegółów
-@Mecz = 'WisPło vs WisKra',
-@Minuta = 70,
+@Mecz = 'WisPło vs LecGda',
+@Minuta = 90,
 @Bramka = null,
+@Bramka_samobójcza = null,
 @Asysta = null,
-@Żółta_kartka = null,
+@Żółta_kartka = 1,
 @Czerwona_kartka = null,
-@Pierwszy_skład = N,
-@Czas_na_boisku = 20,
-@ID_Piłkarza = 423,
-@Zmiany = 'D.Junca -> J.Krzyżanowski';
+@Pierwszy_skład = null,
+@Czas_na_boisku = null,
+@ID_Piłkarza = 434,
+@Zmiany = null ;
+select * from Wisła_Kraków
 
+-- Tabele wyników, ściagnięte z Transfermarkt.com
 CREATE TABLE Wyniki_Excel
 (
 Kolejka tinyint not null,
@@ -173,11 +183,12 @@ Firstrow = 2,
 Fieldterminator = ',',
 Rowterminator = '\n');
 
+-- Insert do tabeli Mecze, gotowych tabel wcześniej pobranych ze strony. Wyczyszczone i przerobione dane z tabeli Wyniki_Excel
 With A as
 
 (Select Kolejka, Cast(Case When Right(Data,2) between '07' and '12' Then '2023' Else '2024' end + '-' + Right(Replace(Right(Data,5),'/','-'),2) + '-'
 +Left(Replace(Right(Data,5),'/','-'),2) + ' ' + Godzina as Smalldatetime) as Data_Meczu, 
-Case When Wynik like 'Arka Gdynia%' then 'ArkGdy' 
+    Case When Wynik like 'Arka Gdynia%' then 'ArkGdy' 
 	 When Wynik like 'Motor Lublin%' then 'MotLub'
 	 When Wynik like 'Chrobry Głogów%' then 'ChrGło'
 	 When Wynik like 'Górnik Łęczna%' then 'GórŁęc'
@@ -222,23 +233,25 @@ Insert into Mecze(Mecz,Gospodarz,Bramki_Gospodarz,Bramki_Gość,Gość,Data_Mecz
 Select Gospodarz + ' vs ' + Gość as Mecz, Gospodarz, Left(Wynik,1) as Bramki_Gospodarz,Right(Wynik,1) as Bramki_Gość, Gość,Data_Meczu, Kolejka
 From A;
 
+
+--Widok tabeli zsumowanych punktów, Wygranych, Remisów i Porażek
 CREATE VIEW Tabela_Punktów as
 
 With A as
 
 (Select *,Case When Bramki_Gospodarz > Bramki_Gość then 3
                When Bramki_Gospodarz = Bramki_Gość then 1
-			   When Bramki_Gospodarz < Bramki_Gość then 0 end as Pkt_Gospodarz,
-		  Case When Bramki_Gospodarz > Bramki_Gość then 0
+	       When Bramki_Gospodarz < Bramki_Gość then 0 end as Pkt_Gospodarz,
+	  Case When Bramki_Gospodarz > Bramki_Gość then 0
                When Bramki_Gospodarz = Bramki_Gość then 1
-			   When Bramki_Gospodarz < Bramki_Gość then 3 end as Pkt_Gość
-			   from Mecze),
+	       When Bramki_Gospodarz < Bramki_Gość then 3 end as Pkt_Gość
+from Mecze),
 
 B as 
 
 (Select Gospodarz as Zespół, sum(Pkt_Gospodarz) as Punkty, Case When Pkt_Gospodarz = 3 then Count(Pkt_Gospodarz) end as Wygrane,
                                                            Case When Pkt_Gospodarz = 1 then Count(Pkt_Gospodarz) end as Remisy,
-														   Case When Pkt_Gospodarz = 0 then Count(Pkt_Gospodarz) end as Porażki
+							   Case When Pkt_Gospodarz = 0 then Count(Pkt_Gospodarz) end as Porażki
 from A
 Group by Gospodarz, Pkt_Gospodarz
 
@@ -246,7 +259,7 @@ Union all
 
 Select Gość as Zespół, sum(Pkt_Gość) as Punkty, Case When Pkt_Gość = 3 then Count(Pkt_Gość) end as Wygrane,
                                                 Case When Pkt_Gość = 1 then Count(Pkt_Gość) end as Remisy,
-												Case When Pkt_Gość = 0 then Count(Pkt_Gość) end as Porażki
+						Case When Pkt_Gość = 0 then Count(Pkt_Gość) end as Porażki
 from A
 Group by Gość, Pkt_Gość),
 
@@ -260,12 +273,12 @@ Select Zespół, sum(Pkt) as Pkt, Sum(Wygrane) as Wygrane, sum(remisy) as Remisy
 from C
 Group by Zespół;
 
-
+-- Tabela Obliczająca Kolejkę(Mecze), bramki strzelone i stracone
 CREATE VIEW Tabele_Kolejki_Bramki as
 
 With A as
 
-(select Gospodarz, Count(Gospodarz) as Mecze, sum(Bramki_Gospodarz) as Bramki_Strzelone, sum(Bramki_Gość) as Bramki_Stracone, Count from Mecze
+(select Gospodarz, Count(Gospodarz) as Mecze, sum(Bramki_Gospodarz) as Bramki_Strzelone, sum(Bramki_Gość) as Bramki_Stracone from Mecze
 group by Gospodarz
 
 union all
@@ -277,8 +290,257 @@ Select Gospodarz as Zespół, sum(Mecze) as Mecze, sum(Bramki_Strzelone) as Bram
 from A
 Group by Gospodarz;
 
+-- Widok tabeli końcowej, do dodania została seria meczów
+CREATE VIEW Tabela_Końcowa as
 
-select * from Tabele_Kolejki_Bramki
-select * from Tabela_Punktów
+Select TKB.Zespół, TKB.Mecze, TB.Wygrane, TB.Remisy, TB.Porażki, TKB.Bramki_Strzelone, TKB.Bramki_Stracone, TKB.Bramki_Strzelone - TKB.Bramki_Stracone as Różnica_Bramek, Pkt
+from Tabele_Kolejki_Bramki as TKB join Tabela_Punktów as TB
+on TKB.Zespół = TB.Zespół;
 
---Dokończyć -> Seria 5 ostatnich meczów, Klasyfikacja kanadyjska, Mała tabela, Król strzelców, Drużyna Fairplay
+CREATE VIEW Serie_Drużyn as
+
+Select Kolejka, Gospodarz as Drużyna, Gość as Przeciwnik, Case When Bramki_Gospodarz > Bramki_Gość then 'W' 
+                                                               When Bramki_Gospodarz = Bramki_Gość then 'R' 
+							       When Bramki_Gospodarz < Bramki_Gość then 'P'  end as Seria
+from Mecze
+												 
+Union
+
+Select Kolejka, Gość as Drużyna, Gospodarz as Przeciwnik, Case When Bramki_Gość > Bramki_Gospodarz then 'W' 
+                                                               When Bramki_Gość = Bramki_Gospodarz then 'R' 
+							       When Bramki_Gość < Bramki_Gospodarz then 'P' end as Seria
+from Mecze;
+
+-- Pivot wspomagający stworzenie serii 5 ostatnich meczy
+CREATE VIEW Pełna_Seria as 
+Select Drużyna, [1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15],[16],[17]
+,[18],[19],[20],[21],[22],[23],[24],[25],[26],[27],[28],[29],[30],[31],[32],[33],[34] from
+(select Drużyna,Kolejka, Seria from Serie_Drużyn) as A
+Pivot(max(Seria) for Kolejka in ([1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15],[16],[17]
+,[18],[19],[20],[21],[22],[23],[24],[25],[26],[27],[28],[29],[30],[31],[32],[33],[34])) as B
+
+-- Widok Tabeli "Tabela_Końcowa" + seria ostatnich 5 meczy
+CREATE VIEW Tabela_Ostateczna as
+
+Select TK.Zespół, TK.Mecze, TK.Wygrane, TK.Remisy, TK.Porażki, TK.Bramki_Strzelone, TK.Bramki_Stracone, TK.Różnica_Bramek, TK.Pkt,
+Case TK.Mecze 
+When 0 Then ' '
+When 1 Then  PS.[1]
+When 2 Then  PS.[1] + PS.[2]
+When 3 Then  PS.[1] + PS.[2] + PS.[3]
+When 4 Then  PS.[1] + PS.[2] + PS.[3] + PS.[4]
+When 5 Then  PS.[1] + PS.[2] + PS.[3] + PS.[4] + PS.[5]
+When 6 Then  PS.[2] + PS.[3] + PS.[4] + PS.[5] + PS.[6]
+When 7 Then  PS.[3] + PS.[4] + PS.[5] + PS.[6] + PS.[7]
+When 8 Then  PS.[4] + PS.[5] + PS.[6] + PS.[7] + PS.[8]
+When 9 Then  PS.[5] + PS.[6] + PS.[7] + PS.[8] + PS.[9]
+When 10 Then PS.[6] + PS.[7] + PS.[8] + PS.[9] + PS.[10]
+When 11 Then PS.[7] + PS.[8] + PS.[9] + PS.[10] + PS.[11]
+When 12 Then PS.[8] + PS.[9] + PS.[10] + PS.[11] + PS.[12]
+When 13 Then PS.[9] + PS.[10] + PS.[11] + PS.[12] + PS.[13]
+When 14 Then PS.[10] + PS.[11] + PS.[12] + PS.[13] + PS.[14]
+When 15 Then PS.[11] + PS.[12] + PS.[13] + PS.[14] + PS.[15]
+When 16 Then PS.[12] + PS.[13] + PS.[14] + PS.[15] + PS.[16]
+When 17 Then PS.[13] + PS.[14] + PS.[15] + PS.[16] + PS.[17]
+When 18 Then PS.[14] + PS.[15] + PS.[16] + PS.[17] + PS.[18]
+When 19 Then PS.[15] + PS.[16] + PS.[17] + PS.[18] + PS.[19]
+When 20 Then PS.[16] + PS.[17] + PS.[18] + PS.[19] + PS.[20]
+When 21 Then PS.[17] + PS.[18] + PS.[19] + PS.[20] + PS.[21]
+When 22 Then PS.[18] + PS.[19] + PS.[20] + PS.[21] + PS.[22]
+When 23 Then PS.[19] + PS.[20] + PS.[21] + PS.[22] + PS.[23]
+When 24 Then PS.[20] + PS.[21] + PS.[22] + PS.[23] + PS.[24]
+When 25 Then PS.[21] + PS.[22] + PS.[23] + PS.[24] + PS.[25]
+When 26 Then PS.[22] + PS.[23] + PS.[24] + PS.[25] + PS.[26]
+When 27 Then PS.[23] + PS.[24] + PS.[25] + PS.[26] + PS.[27]
+When 28 Then PS.[24] + PS.[25] + PS.[26] + PS.[27] + PS.[28]
+When 29 Then PS.[25] + PS.[26] + PS.[27] + PS.[28] + PS.[29]
+When 30 Then PS.[26] + PS.[27] + PS.[28] + PS.[29] + PS.[30]
+When 31 Then PS.[27] + PS.[28] + PS.[29] + PS.[30] + PS.[31]
+When 32 Then PS.[28] + PS.[29] + PS.[30] + PS.[31] + PS.[32]
+When 33 then PS.[29] + PS.[30] + PS.[31] + PS.[32] + PS.[33]
+When 34 Then PS.[30] + PS.[31] + PS.[32] + PS.[33] + PS.[34] end as Seria
+from Tabela_Końcowa as TK join Pełna_Seria as PS
+on TK.Zespół = PS.Drużyna
+
+-- Widok Kolejka, Bramki_Strzelone, Bramki_Stracone dla Tabela Końcowa w domu
+CREATE VIEW Bramki_Dom as 
+select Gospodarz, Count(Gospodarz) as Mecze, sum(Bramki_Gospodarz) as Bramki_Strzelone, sum(Bramki_Gość) as Bramki_Stracone from Mecze
+group by Gospodarz
+
+-- Pkt, Wygrane, Remisy, Porażki dla Tabela końcowa "w domu"
+CREATE VIEW Tabela_Końcowa_Dom as
+
+With A as
+
+(Select *,Case When Bramki_Gospodarz > Bramki_Gość then 3
+               When Bramki_Gospodarz = Bramki_Gość then 1
+	       When Bramki_Gospodarz < Bramki_Gość then 0 end as Pkt_Gospodarz
+					   from Mecze),
+
+B as 
+
+(Select Gospodarz as Zespół, sum(Pkt_Gospodarz) as Punkty, Case When Pkt_Gospodarz = 3 then Count(Pkt_Gospodarz) end as Wygrane,
+                                                           Case When Pkt_Gospodarz = 1 then Count(Pkt_Gospodarz) end as Remisy,
+							   Case When Pkt_Gospodarz = 0 then Count(Pkt_Gospodarz) end as Porażki
+														        
+from A
+Group by Gospodarz, Pkt_Gospodarz),
+
+C as
+
+(Select Zespół, sum(Punkty) as Pkt, Wygrane, Remisy, Porażki
+from B
+Group by Zespół,Wygrane,Remisy,Porażki)
+
+Select C.Zespół, sum(C.Pkt) as Pkt, Sum(C.Wygrane) as Wygrane, sum(C.remisy) as Remisy, sum(C.Porażki) as Porażki, 
+BD.Bramki_Strzelone, BD.Bramki_Stracone, Bramki_Strzelone - Bramki_Stracone AS Różnica_Bramek
+from C as C join Bramki_Dom as BD on C.Zespół = BD.Gospodarz
+Group by C.Zespół, BD.Bramki_Strzelone, BD.Bramki_Stracone;
+
+-- Widok Kolejka, Bramki_Strzelone, Bramki_Stracone dla Tabela Końcowa na wyjeździe
+CREATE VIEW Bramki_Wyjazd as 
+select Gość, Count(Gość) as Mecze, sum(Bramki_Gość) as Bramki_Strzelone, sum(Bramki_Gospodarz) as Bramki_Stracone from Mecze
+Group by Gość
+
+-- Pkt, Wygrane, Remisy, Porażki dla Tabela końcowa "na wyjeździe"
+CREATE VIEW Tabela_Końcowa_Wyjazd as 
+
+With A as
+
+(Select *, Case When Bramki_Gospodarz > Bramki_Gość then 0
+                When Bramki_Gospodarz = Bramki_Gość then 1
+	        When Bramki_Gospodarz < Bramki_Gość then 3 end as Pkt_Gość from Mecze),
+
+B as
+
+(Select Gość as Zespół, sum(Pkt_Gość) as Punkty, Case When Pkt_Gość = 3 then Count(Pkt_Gość) end as Wygrane,
+                                            Case When Pkt_Gość = 1 then Count(Pkt_Gość) end as Remisy,
+										    Case When Pkt_Gość = 0 then Count(Pkt_Gość) end as Porażki 
+from A
+Group by Gość, Pkt_Gość),
+
+C as 
+
+(Select Zespół, sum(Punkty) as Pkt, Wygrane, Remisy, Porażki
+from B
+Group by Zespół,Wygrane,Remisy,Porażki)
+
+Select C.Zespół, sum(C.Pkt) as Pkt, Sum(C.Wygrane) as Wygrane, sum(C.remisy) as Remisy, sum(C.Porażki) as Porażki, 
+BW.Bramki_Strzelone, BW.Bramki_Stracone, Bramki_Strzelone - Bramki_Stracone as Różnica_Bramek
+from C as C join Bramki_Wyjazd as BW on C.Zespół = BW.Gość
+Group by C.Zespół, BW.Bramki_Strzelone, BW.Bramki_Stracone;
+
+-- Kolejka, Bramki_Strzelone, Bramki_Stracone dla Tabela Końcowa w domu
+select Gospodarz, Count(Gospodarz) as Mecze, sum(Bramki_Gospodarz) as Bramki_Strzelone, sum(Bramki_Gość) as Bramki_Stracone from Mecze
+Group by Gospodarz
+
+-- Procedura na Widok ostateczny Szczegółów meczy
+CREATE PROCEDURE Szczegóły
+@Mecz Char(16) as
+
+With A as
+
+(Select SM.Minuta, SM.Bramka, SM.Bramka_samobójcza, SM.Asysta, SM.Żółta_kartka, SM.Czerwona_kartka, SM.Zmiany, P.ID_piłkarza, P.ID_Klubu, P.Zawodnik
+from Szczegóły_Meczu as SM left outer join Piłkarze as P
+on SM.ID_Piłkarza = P.ID_Piłkarza
+Where Minuta is not null and
+Mecz = @Mecz),
+
+B as
+
+(Select Minuta, Case When Bramka is not null Then 'Gol'
+                     When Bramka_samobójcza is not null Then 'Bramka samobójcza'
+                     When Asysta is not null Then 'Asysta'
+		     When Żółta_kartka is not null Then 'Żółta kartka' 
+		     When Czerwona_kartka is not null Then 'Czerwona kartka'
+                     When Zmiany is not null Then 'Zmiana' end as Wydarzenie,
+ ID_Piłkarza, ID_Klubu, Zmiany, Zawodnik
+From A)
+
+Select Minuta, ID_Klubu ,Wydarzenie, Case When Wydarzenie = 'Zmiana' Then Zmiany Else Zawodnik end as Zawodnik from B 
+Order by Minuta, ID_Klubu, Wydarzenie desc
+
+-- Widok sumujący wszystkie osiągnięcia piłkarzy -> Klasyfikacja
+CREATE VIEW Klasyfikacja_1na2 as
+
+With A as
+
+(Select ID_Piłkarza, sum(Bramka) as Bramki, sum(Asysta) as Asysty, sum(Żółta_kartka) as Żółte_kartki,
+sum(Czerwona_kartka) as Czerwone_kartki, sum(Czas_na_boisku) as Czas_na_Boisku
+from Szczegóły_Meczu 
+Group by ID_Piłkarza)
+
+Select P.Zawodnik, P.ID_Piłkarza, P.ID_Klubu, Bramki, Asysty, Żółte_kartki, Czerwone_kartki, Czas_na_boisku
+from A join Piłkarze as P on A.ID_Piłkarza = P.ID_Piłkarza
+
+CREATE VIEW Klasyfikacja_2na2 as
+Select ID_Piłkarza, Count(Pierwszy_skład) as Pierwsza_11
+from Szczegóły_Meczu
+Where Pierwszy_skład = 'T'
+Group by ID_Piłkarza
+
+CREATE VIEW Klasyfikacja as
+Select P.Zawodnik, P.ID_Klubu, A.Bramki, A.Asysty, A.Żółte_kartki, A.Czerwone_kartki, A.Czas_na_boisku, B.Pierwsza_11
+from Klasyfikacja_1na2 AS A JOIN Klasyfikacja_2na2 as B on A.ID_Piłkarza = B.ID_Piłkarza
+join Piłkarze as P on A.ID_Piłkarza = P.ID_Piłkarza
+
+
+------------------------------------------------------Selecty, Egzekucje i Inserty---------------------------------------------------------------------------------
+
+-- Przykładowa egzekucja Szczegółów Meczu
+ exec Szczegóły 'WisPło vs LecGda';
+
+-- Przykładowe składy drużyn
+ Select * from Wisła_Kraków;
+
+-- Pełna tabela
+ select * from Tabela_Końcowa
+ Order by Pkt desc, Bramki_Strzelone, Bramki_Stracone;
+
+-- Pełna tabela meczów rozgrywanych w "domu" 
+ select * from Tabela_Końcowa_Dom
+ Order by Pkt desc, Bramki_Strzelone, Bramki_Stracone;
+
+-- Pełna tabela meczów rozgrywanych na "wyjeździe"
+ select * from Tabela_Końcowa_Wyjazd
+ Order by Pkt desc, Bramki_Strzelone, Bramki_Stracone;
+
+-- Klasyfikacja piłkarzy, do wyboru - Bramki, Asysty, Żółte_kartki, Czerwone_kartki, Czas_na_boisku, Pierwsza_11
+ Select Zawodnik,ID_Klubu, Bramki
+ from Klasyfikacja
+ Order by Bramki desc
+
+-- Przykładowa ezgekucja jednego z meczów
+ Exec Wstawianie_Meczów
+ @Mecz = 'OdrOpo vs ZniPru',
+ @Gospodarz = 'OdrOpo',
+ @Bramki_Gospodarz = 2,
+ @Bramki_Gość = 0,
+ @Gość = 'ZniPru',
+ @Data_meczu = '20240526 15:00',
+ @Kolejka = 34 ;
+
+-- Przykładowa egzekucja wstawiania szczegółów
+ Exec Wstawianie_Szczegółów
+ @Mecz = 'WisPło vs LecGda',
+ @Minuta = 90,
+ @Bramka = null,
+ @Bramka_samobójcza = null,
+ @Asysta = null,
+ @Żółta_kartka = 1,
+ @Czerwona_kartka = null,
+ @Pierwszy_skład = null,
+ @Czas_na_boisku = null,
+ @ID_Piłkarza = 434,
+ @Zmiany = null ;
+ 
+-- Insert wymagający pliki w formacie UTF-16
+ BULK INSERT Wyniki_Excel from 'C:\Users\HP\Desktop\Projekt_tabel\Wyniki_Excel.csv' with
+(
+Datafiletype = 'Widechar',
+Format = 'CSV',
+Firstrow = 2,
+Fieldterminator = ',',
+Rowterminator = '\n');
+
+
