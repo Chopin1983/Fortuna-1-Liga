@@ -109,7 +109,7 @@ Select ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth from Znicz_P
 -- update of errors on the site, add to bulk insert option Check_Constraint
 UPDATE Znicz_Pruszków
 set Position = Case When Position = 'Prawy pomocnik' then 'Right Winger'
-		   When Position = 'Lewy pomocnik' then 'Left Winger' end
+		    When Position = 'Lewy pomocnik' then 'Left Winger' end
 Where Position in ('Prawy pomocnik', 'Lewy pomocnik');
 
 -- Procedure for inserting the match result
@@ -165,7 +165,6 @@ Exec Insert_Details
 @Minutes_On_The_Pitch = null,
 @ID_Player = 434,
 @Substitution = null ;
-select * from Wisła_Kraków
 
 -- Table of results, downloaded from Transfermarkt.com
 CREATE TABLE Wyniki_Excel
@@ -250,16 +249,16 @@ from Matches),
 B as 
 
 (Select Home as Team, sum(Pts_Home) as Points, Case When Pts_Home = 3 then Count(Pts_Home) end as Win,
-                                                           Case When Pts_Home = 1 then Count(Pts_Home) end as Draw,
-							   Case When Pts_Home = 0 then Count(Pts_Home) end as Lose
+                                               Case When Pts_Home = 1 then Count(Pts_Home) end as Draw,
+					       Case When Pts_Home = 0 then Count(Pts_Home) end as Lose
 from A
 Group by Home, Pts_Home
 
 Union all
 
 Select Away as Team, sum(Pts_Away) as Points, Case When Pts_Away = 3 then Count(Pts_Away) end as Win,
-                                                Case When Pts_Away = 1 then Count(Pts_Away) end as Draw,
-						Case When Pts_Away = 0 then Count(Pts_Away) end as Lose
+                                              Case When Pts_Away = 1 then Count(Pts_Away) end as Draw,
+					      Case When Pts_Away = 0 then Count(Pts_Away) end as Lose
 from A
 Group by Away, Pts_Away),
 
@@ -375,13 +374,13 @@ With A as
 (Select *,Case When Goal_Home > Goal_Away then 3
                When Goal_Home = Goal_Away then 1
 	       When Goal_Home < Goal_Away then 0 end as Pts_Home
-					   from Matches),
+from Matches),
 
 B as 
 
 (Select Home as Team, sum(Pts_Home) as Points, Case When Pts_Home = 3 then Count(Pts_Home) end as Win,
-                                                           Case When Pts_Home = 1 then Count(Pts_Home) end as Draw,
-							   Case When Pts_Home = 0 then Count(Pts_Home) end as Lose
+                                               Case When Pts_Home = 1 then Count(Pts_Home) end as Draw,
+					       Case When Pts_Home = 0 then Count(Pts_Home) end as Lose
 														        
 from A
 Group by Home, Pts_Home),
