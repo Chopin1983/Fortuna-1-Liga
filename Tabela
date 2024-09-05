@@ -299,15 +299,15 @@ on TRG.Team = GT.Team;
 CREATE VIEW Team_Series as
 
 Select Round, Home as Team, Away as Opponent, Case When Goal_Home > Goal_Away then 'W' 
-                                                               When Goal_Home = Goal_Away then 'D' 
-							       When Goal_Home < Goal_Away then 'L'  end as Series
+                                                   When Goal_Home = Goal_Away then 'D' 
+						   When Goal_Home < Goal_Away then 'L'  end as Series
 from Matches
 												 
 Union
 
 Select Round, Away as Team, Home as Opponent, Case When Goal_Away > Goal_Home then 'W' 
-                                                               When Goal_Away = Goal_Home then 'D' 
-							       When Goal_Away < Goal_Home then 'L' end as Series
+                                                   When Goal_Away = Goal_Home then 'D' 
+						   When Goal_Away < Goal_Home then 'L' end as Series
 from Matches;
 
 -- Pivot helping create series from last 5 Matches
