@@ -456,7 +456,7 @@ From A)
 Select Minute, ID_Team , Casus, Case When Casus = 'Substitution' Then Substitution Else Player_Name end as Player_Name from B 
 Order by Minute, ID_Team, Casus desc
 
--- A view summarizing all the players achivements 
+-- A view summarizing all details of the players
 CREATE VIEW Classification_1from2 as
 
 With A as
@@ -539,5 +539,5 @@ Firstrow = 2,
 Fieldterminator = ',',
 Rowterminator = '\n');
 
--- Tables availeble for download - Szczegóły_meczu (Match details), Wyniki_Excel (Downloaded matches results), Teams Tables
+-- Tables available for download - Szczegóły_meczu (Match details), Wyniki_Excel (Downloaded matches results), Teams Tables
 https://www.dropbox.com/scl/fo/2w6m6vq51xr0qbrxfumlu/AL_mlQZohJeK2WA4A_77ago?rlkey=jk029h1xc6riga4nx0b9tfhqu&st=140k5pke&dl=0
