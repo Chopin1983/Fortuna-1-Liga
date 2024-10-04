@@ -462,12 +462,12 @@ CREATE VIEW Classification_1from2 as
 With A as
 
 (Select ID_Player, sum(Goal) as Goals, sum(Assist) as Assists, sum(Yellow_Card) as Yellow_Cards,
-sum(Red_Card) as c, sum(Minutes_On_The_Pitch) as Minutes_On_The_Pitch
+sum(Red_Card) as Red_Cards, sum(Minutes_On_The_Pitch) as Minutes_On_The_Pitch
 from Match_Details 
 Group by ID_Player)
 
 Select PN.Player_Name, PN.ID_Player, PN.ID_Team, A.Goals, A.Assists, A.Yellow_Cards, A.Red_Cards, A.Minutes_On_The_Pitch
-from A join Players_Names as PN on A.ID_Player = P.ID_Player
+from A join Players_Names as PN on A.ID_Player = PN.ID_Player
 
 CREATE VIEW Classification_2from2 as
 Select ID_Player, Count(First_Team) as First_11
