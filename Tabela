@@ -318,10 +318,43 @@ Select Team, [1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15],[
 Pivot(max(Series) for Round in ([1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15],[16],[17]
 ,[18],[19],[20],[21],[22],[23],[24],[25],[26],[27],[28],[29],[30],[31],[32],[33],[34])) as B
 
--- Widok Tabeli "Final_Table" + Series ostatnich 5 Matchy -- Table view "Final table" + Series last 5 matches
-CREATE VIEW Tabela_Ostateczna as
+-- Table View "Final_Table" + Series last 5 Matches -- Table view "Final table" + Series last 5 matches
+CREATE VIEW Final_Table_plus_series as           
 
-Select FT.Team, FT.Matches, FT.Win, FT.Draw, FT.Lose, FT.Goals_For, FT.Goals_Against, FT.Goal_Difference, FT.Pts,
+Select Case When Left(FT.Team,3) = 'Ark' Then 'Arka'
+            When Left(FT.Team,3) = 'BBT' Then 'Bruk-Bet Termalica'
+			When Left(FT.Team,3) = 'Chr' Then 'Chrobry'
+			When Left(FT.Team,3) = 'GKS' Then 'GKS' 
+			When Left(FT.Team,3) = 'Gór' Then 'Górnik'
+			When Left(FT.Team,3) = 'Lec' Then 'Lechia'
+			When Left(FT.Team,3) = 'Mie' Then 'Miedź'
+			When Left(FT.Team,3) = 'Mot' Then 'Motor'
+			When Left(FT.Team,3) = 'Odr' Then 'Odra'
+			When Left(FT.Team,3) = 'Pod' Then 'Podbeskidzie'
+			When Left(FT.Team,3) = 'Pol' Then 'Polonia'
+			When Left(FT.Team,3) = 'Res' Then 'Resovia'
+			When Left(FT.Team,3) = 'Sta' Then 'Stal'
+			When Left(FT.Team,3) = 'Wis' Then 'Wisła'
+			When Left(FT.Team,3) = 'Zag' Then 'Zagłębie'
+			When Left(FT.Team,3) = 'Zni' Then 'Znicz'  end as Name
+,Case When Right(FT.Team,3) = 'Gdy' Then 'Gdynia'
+      When Right(FT.Team,3) = 'Nie' Then 'Nieciecza'
+	  When Right(FT.Team,3) = 'Gło' Then 'Głogów'
+	  When Right(FT.Team,3) = 'Kat' Then 'Katowice'
+	  When Right(FT.Team,3) = 'Tyc' Then 'Tychy'
+	  When Right(FT.Team,3) = 'Łęc' Then 'Łęczna'
+	  When Right(FT.Team,3) = 'Gda' Then 'Gdańsk'
+	  When Right(FT.Team,3) = 'Leg' Then 'Legnica'
+	  When Right(FT.Team,3) = 'Lub' Then 'Lublin'
+	  When Right(FT.Team,3) = 'Opo' Then 'Opole'
+	  When Right(FT.Team,3) = 'BBi' Then 'Bielsko-Biała'
+	  When Right(FT.Team,3) = 'War' Then 'Warszawa'
+	  When Right(FT.Team,3) = 'Rze' Then 'Rzeszów'
+	  When Right(FT.Team,3) = 'Kra' Then 'Kraków'
+	  When Right(FT.Team,3) = 'Pło' Then 'Płock'
+	  When Right(FT.Team,3) = 'Sos' Then 'Sosnowiec'
+	  When Right(FT.Team,3) = 'Pru' Then 'Pruszków'  end as City, 
+	  FT.Matches, FT.Win, FT.Draw, FT.Lose, FT.Goals_For, FT.Goals_Against, FT.Goal_Difference, FT.Pts,
 Case FT.Matches 
 When 0 Then ' '
 When 1 Then  FS.[1]
@@ -360,7 +393,6 @@ When 33 then FS.[29] + FS.[30] + FS.[31] + FS.[32] + FS.[33]
 When 34 Then FS.[30] + FS.[31] + FS.[32] + FS.[33] + FS.[34] end as Series
 from Final_Table as FT join Full_Series as FS
 on FT.Team = FS.Team
-
 -- Rounds view, goals for, goals against for Final_Table_Home
 CREATE VIEW Goal_Home as 
 select Home, Count(Home) as Matches, sum(Goal_Home) as Goals_For, sum(Goal_Away) as Goals_Against from Matches
@@ -490,7 +522,7 @@ join Players_Names as PN on A.ID_Player = PN.ID_Player
  Select * from Wisła_Kraków;
 
 -- Final table 
- select * from Final_Table
+ select * from Final_Table_plus_series
  Order by Pts desc, Goals_For, Goals_Against;
 
 -- Final table of home matches
