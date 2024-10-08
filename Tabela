@@ -200,7 +200,7 @@ With A as
 	 When Result like 'Zagłębie Sosnowiec%' then 'ZagSos'
 	 When Result like 'Lechia Gdańsk%' then 'LecGda'
 	 When Result like 'Wisła Kraków%' then 'WisKra'
-	 When Result like 'GKS Tychy%' then 'GksTyc'
+	 When Result like 'GKS Tychy%' then 'GKSTyc'
 	 When Result like 'Wisła Płock%' then 'WisPło'
 	 When Result like 'Resovia%' then 'ResRze'
 	 When Result like 'GKS Katowice%' then 'GKSKat'
