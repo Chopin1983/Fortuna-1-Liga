@@ -90,7 +90,7 @@ Select ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth from Motor_L
 union all
 Select ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth from Odra_Opole
 union all
-Select ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth from Podbeskidzie_BielskoBiała
+Select ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth from Podbeskidzie_Bielsko_Biała
 union all
 Select ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth from Polonia_Warszawa
 union all
@@ -111,6 +111,20 @@ UPDATE Znicz_Pruszków
 set Position = Case When Position = 'Prawy pomocnik' then 'Right Winger'
 		    When Position = 'Lewy pomocnik' then 'Left Winger' end
 Where Position in ('Prawy pomocnik', 'Lewy pomocnik');
+
+-- change language to English in every table
+UPDATE GKS_Katowice
+set Position = Case When Position = 'Bramkarz' then 'Goalkeeper'
+		            When Position = 'Środkowy obrońca' then 'Central Defender'
+					When Position = 'Lewy obrońca' then 'Left Defender' 
+					When Position = 'Prawy obrońca' then 'Right Defender'
+					When Position = 'Defensywny pomocnik' then 'Defensive Midfielder'
+					When Position = 'Ofensywny pomocnik' then 'Attacking Midfielder'
+					When Position = 'Lewy napastnik' then 'Left Winger'
+					When Position = 'Prawy napastnik' then 'Right Winger'
+					When Position = 'Środkowy napastnik' then 'Striker' end
+					Where Position in ('Bramkarz','Środkowy obrońca','Lewy obrońca','Prawy obrońca','Defensywny pomocnik','Ofensywny pomocnik',
+					'Lewy napastnik','Prawy napastnik','Środkowy napastnik')
 
 -- Procedure for inserting the match result
 CREATE PROCEDURE Insertion_Matches
