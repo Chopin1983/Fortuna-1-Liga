@@ -69,7 +69,7 @@ or Position like 'Right Winger' or Position like 'Striker'));
 
 
 -- Insert every tables of players to one table
-INSERT INTO Players_Names(ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth)
+INSERT INTO Players(ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth)
 Select ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth from Arka_Gdynia
 union all
 Select ID_Player, ID_Team, Player_Name, Nr, Position, Date_Of_Birth from BBT_Nieciecza
