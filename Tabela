@@ -483,7 +483,7 @@ CREATE PROCEDURE Details
 With A as
 
 (Select SM.Minute, SM.Goal, SM.Own_Goal, SM.Assist, SM.Yellow_Card, SM.Red_Card, SM.Substitution, P.ID_Player, P.ID_Team, P.Player_Name
-from Match_Details as SM left outer join Players_Names as P
+from Match_Details as SM left outer join Players as P
 on SM.ID_Player = P.ID_Player
 Where Minute is not null and
 Match = @Match),
